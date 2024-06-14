@@ -1,4 +1,5 @@
 # TechVidvan Vehicle counting and Classification
+import os.path
 
 # Import necessary packages
 
@@ -172,20 +173,20 @@ def realTime():
 
         # Draw the crossing lines
 
-        cv2.line(img, (0, middle_line_position), (iw, middle_line_position), (255, 0, 255), 2)
-        cv2.line(img, (0, up_line_position), (iw, up_line_position), (0, 0, 255), 2)
-        cv2.line(img, (0, down_line_position), (iw, down_line_position), (0, 0, 255), 2)
+        cv2.line(img, (0, middle_line_position), (iw, middle_line_position), (255, 0, 255), 1)
+        cv2.line(img, (0, up_line_position), (iw, up_line_position), (0, 0, 255), 1)
+        cv2.line(img, (0, down_line_position), (iw, down_line_position), (0, 0, 255), 1)
 
         # Draw counting texts in the frame
-        cv2.putText(img, "Up", (110, 20), cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
-        cv2.putText(img, "Down", (160, 20), cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
-        cv2.putText(img, "Car:        " + str(up_list[0]) + "     " + str(down_list[0]), (20, 40),
+        cv2.putText(img, "To", (820, 520), cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
+        cv2.putText(img, "From", (860, 520), cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
+        cv2.putText(img, "Car:        " + str(up_list[0]) + "     " + str(down_list[0]), (730, 540),
                     cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
-        cv2.putText(img, "Motorbike:  " + str(up_list[1]) + "     " + str(down_list[1]), (20, 60),
+        cv2.putText(img, "Motorbike:  " + str(up_list[1]) + "     " + str(down_list[1]), (730, 560),
                     cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
-        cv2.putText(img, "Bus:        " + str(up_list[2]) + "     " + str(down_list[2]), (20, 80),
+        cv2.putText(img, "Bus:        " + str(up_list[2]) + "     " + str(down_list[2]), (730, 580),
                     cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
-        cv2.putText(img, "Truck:      " + str(up_list[3]) + "     " + str(down_list[3]), (20, 100),
+        cv2.putText(img, "Truck:      " + str(up_list[3]) + "     " + str(down_list[3]), (730, 600),
                     cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, font_thickness)
         print(down_list)
 
@@ -196,63 +197,27 @@ def realTime():
             break
 
     # Write the vehicle counting information in a file and save it
-
-    with open("data.csv", 'w') as f1:
+    file_path = 'data.csv'
+    # Check if the file already exists
+    file_exists = os.path.isfile(file_path)
+    with open(file_path,mode='a',newline='') as f1:
         cwriter = csv.writer(f1)
-        cwriter.writerow(['Direction', 'car', 'motorbike', 'bus', 'truck'])
+
+        # Write the header only if the file didn't already exist
+        if not file_exists:
+            cwriter.writerow(['Direction', 'car', 'motorbike', 'bus', 'truck'])
+
+        # Insert direction and write data
         up_list.insert(0, "Up")
         down_list.insert(0, "Down")
         cwriter.writerow(up_list)
         cwriter.writerow(down_list)
     f1.close()
-    # print("Data saved at 'data.csv'")
+    print("Data saved at 'data.csv'")
     # Finally realese the capture object and destroy all active windows
     cap.release()
     cv2.destroyAllWindows()
 
 
-image_file = 'vehicle classification-image02.png'
-
-
-def from_static_image(image):
-    img = cv2.imread(image)
-
-    blob = cv2.dnn.blobFromImage(img, 1 / 255, (input_size, input_size), [0, 0, 0], 1, crop=False)
-
-    # Set the input of the network
-    net.setInput(blob)
-    layersNames = net.getLayerNames()
-    outputNames = [(layersNames[i[0] - 1]) for i in net.getUnconnectedOutLayers()]
-    # Feed data to the network
-    outputs = net.forward(outputNames)
-
-    # Find the objects from the network output
-    postProcess(outputs, img)
-
-    # count the frequency of detected classes
-    frequency = collections.Counter(detected_classNames)
-    print(frequency)
-    # Draw counting texts in the frame
-    cv2.putText(img, "Car:        " + str(frequency['car']), (20, 40), cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color,
-                font_thickness)
-    cv2.putText(img, "Motorbike:  " + str(frequency['motorbike']), (20, 60), cv2.FONT_HERSHEY_SIMPLEX, font_size,
-                font_color, font_thickness)
-    cv2.putText(img, "Bus:        " + str(frequency['bus']), (20, 80), cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color,
-                font_thickness)
-    cv2.putText(img, "Truck:      " + str(frequency['truck']), (20, 100), cv2.FONT_HERSHEY_SIMPLEX, font_size,
-                font_color, font_thickness)
-
-    cv2.imshow("image", img)
-
-    cv2.waitKey(0)
-
-    # save the data to a csv file
-    with open("static-data.csv", 'a') as f1:
-        cwriter = csv.writer(f1)
-        cwriter.writerow([image, frequency['car'], frequency['motorbike'], frequency['bus'], frequency['truck']])
-    f1.close()
-
-
 if __name__ == '__main__':
     realTime()
-    # from_static_image(image_file)
